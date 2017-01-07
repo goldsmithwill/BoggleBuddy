@@ -24,17 +24,17 @@ public class Validator {
 		setAnchorIndex(new int[] { 0, 0 });
 		setSearchIndex(new int[] { 0, 0 });
 
-		for (int i = 0; i < board.length; i++) {
-			System.out.println(Arrays.toString(board[i]));
+		for (int i = 0; i < getBoard().length; i++) {
+			System.out.println(Arrays.toString(getBoard()[i]));
 		}
 
-		lookup("");
+		lookup("" + getBoard()[0][0]);
 	}
 
 	// walkthrough method to walk through board
 
 	public void walkthrough(String searchWord, String[] validWords) {
-		
+
 		lookup(searchWord);
 
 	}
@@ -55,26 +55,34 @@ public class Validator {
 			}
 		}
 
-		// if the wordList contains the searchWord
+		// if the wordList contains the searchWord		
 		if (getWordList().contains(searchWord)) {
-//			System.out.println(getWordList().indexOf(searchWord));
 			System.out.println(searchWord);
 			nextAnchor();
-			searchWord = Character.toString(getBoard()[getAnchorX()][getAnchorY()]);
-			walkthrough(searchWord, validWords.toArray(new String[validWords.size()]));
-		}
+			if (getAnchorY() < 4) {
+				searchWord = Character.toString(getBoard()[getAnchorX()][getAnchorY()]);
+				walkthrough(searchWord, validWords.toArray(new String[validWords.size()]));
+			}
 		
+		
+		}
 		// if no words start with searchWord
 		if (validWords.size() == 0) {
 			nextAnchor();
-			searchWord = Character.toString(getBoard()[getAnchorX()][getAnchorY()]);
-			walkthrough(searchWord, validWords.toArray(new String[validWords.size()]));
+
+			if (getAnchorY() < 4) {
+				searchWord = Character.toString(getBoard()[getAnchorX()][getAnchorY()]);
+				walkthrough(searchWord, validWords.toArray(new String[validWords.size()]));
+			}
 		}
 		// if at least one word starts with searchWord
 		else {
 			nextSearchIndex();
-			searchWord += getBoard()[getAnchorX()][getAnchorY()];
-			walkthrough (searchWord, validWords.toArray(new String[validWords.size()]));
+
+			if (getSearchY() < 4) {
+				searchWord += getBoard()[getSearchX()][getSearchY()];
+				walkthrough(searchWord, validWords.toArray(new String[validWords.size()]));
+			}
 		}
 	}
 
@@ -107,7 +115,11 @@ public class Validator {
 		List<String> lines = new ArrayList<String>();
 
 		while (scanner.hasNextLine()) {
-			lines.add(scanner.nextLine());
+			String nextLine = scanner.nextLine();
+			// if the word is at least 3 letters
+			if (nextLine.length() > 2) {
+				lines.add(nextLine);
+			}
 		}
 
 		// making array from arraylist
@@ -119,17 +131,18 @@ public class Validator {
 	// methods for currentIndex
 
 	public void nextSearchIndex() {
-		try {
+		if (getSearchX() + 1 < 4) {
 			setSearchIndex(new int[] { getSearchX() + 1, getSearchY() });
-		} catch (ArrayIndexOutOfBoundsException e) {
+		} else {
 			setSearchIndex(new int[] { 0, getSearchY() + 1 });
 		}
+
 	}
 
 	public void nextAnchor() {
-		try {
+		if (getAnchorX() < 3) {
 			setAnchorIndex(new int[] { getAnchorX() + 1, getAnchorY() });
-		} catch (ArrayIndexOutOfBoundsException e) {
+		} else {
 			setAnchorIndex(new int[] { 0, getAnchorY() + 1 });
 		}
 
