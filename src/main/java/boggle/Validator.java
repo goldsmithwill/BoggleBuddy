@@ -57,7 +57,7 @@ public class Validator {
 			// putting currentWord into recursive validateWord method
 			validateWord(currentWord, boardCopy, boardIndexes, 0);
 		}
-		
+
 		System.out.println(getValidWordSet());
 	}
 
@@ -69,9 +69,9 @@ public class Validator {
 			getValidWordSet().add(searchWord);
 			return;
 		}
-		
+
 		char currentChar = searchWord.charAt(charIndex);
-		
+
 		for (int i = 0; i < nextIndexes.size(); i++) {
 			// creating x and y from current index in nextIndexes
 			int x = nextIndexes.get(i)[0];
