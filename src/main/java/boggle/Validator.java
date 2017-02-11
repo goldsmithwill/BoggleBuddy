@@ -57,6 +57,8 @@ public class Validator {
 			// putting currentWord into recursive validateWord method
 			validateWord(currentWord, boardCopy, boardIndexes, 0);
 		}
+		
+		System.out.println(getValidWordSet());
 	}
 
 	// boolean recursive validateWord method
@@ -64,7 +66,7 @@ public class Validator {
 	public void validateWord(String searchWord, char[][] board, List<int[]> nextIndexes, int charIndex) {
 		// creating currentChar from charIndex
 		if (charIndex == searchWord.length()) {
-			System.out.println("SEARCHWORD: " + searchWord);
+			getValidWordSet().add(searchWord);
 			return;
 		}
 		
@@ -228,7 +230,7 @@ public class Validator {
 		// making array from arraylist
 		setWordList(lines);
 
-		setvalidWordSet(new HashSet<String>());
+		setValidWordSet(new HashSet<String>());
 		scanner.close();
 	}
 
@@ -240,11 +242,11 @@ public class Validator {
 		this.wordList = wordList;
 	}
 
-	public Set<String> getvalidWordSet() {
+	public Set<String> getValidWordSet() {
 		return validWordSet;
 	}
 
-	public void setvalidWordSet(Set<String> validWordSet) {
+	public void setValidWordSet(Set<String> validWordSet) {
 		this.validWordSet = validWordSet;
 	}
 
