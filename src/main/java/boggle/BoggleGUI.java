@@ -2,10 +2,11 @@ package boggle;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Set;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -30,6 +31,10 @@ public class BoggleGUI extends Application {
 	// creating validator and labelArray fields
 	private Validator validator;
 	private Label[][] labelArray;
+	private Set<String> inputWordSet;
+	// DELETE THIS NEXT FIELD LATER
+	// ITS ONLY TEMPORARY
+	static Label wordsLabel;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -45,7 +50,7 @@ public class BoggleGUI extends Application {
 		Group root = new Group();
 		primaryStage.setScene(new Scene(root));
 		primaryStage.setResizable(false);
-		
+
 		// setting validator field
 		try {
 			setValidator(new Validator());
@@ -139,7 +144,7 @@ public class BoggleGUI extends Application {
 
 					// comparing validWordSet w/ textField value
 					if (getValidator().getValidWordSet().contains(text)) {
-						System.out.println("MATCH: " + text);
+						updateWordsLabel(text);
 					} else {
 						System.out.println("NO MATCH");
 					}
@@ -150,51 +155,42 @@ public class BoggleGUI extends Application {
 			}
 		});
 
-		//creating timerLabel
-		Label timerLabel = new Label();	
+		// creating timerLabel
+		AnimationTimer timer = new AnimationTimer();
+		Label timerLabel = new Label();
 		timerLabel.setPrefSize(300, 100);
 		timerLabel.setFont(new Font(20));
 		timerLabel.setStyle("-fx-border-color: black;");
-		
+
+		// creating wordsLabel and initializing the input set
+		setInputWordSet(new HashSet<String>());
+
+		wordsLabel = new Label();
+		wordsLabel.setPrefSize(300, 375);
+		wordsLabel.setFont(new Font(20));
+		wordsLabel.setStyle("-fx-border-color: black;");
+
 		// creating vboxes and hboxes and adding them to GUI
 		VBox boardAndInput = new VBox();
 		boardAndInput.getChildren().addAll(tilePane, inputTextField);
 
 		VBox timerAndWords = new VBox();
-		timerAndWords.getChildren().addAll(timerLabel);
+		timerAndWords.getChildren().addAll(timerLabel, wordsLabel);
 
 		HBox hbox = new HBox();
 		hbox.getChildren().addAll(boardAndInput, timerAndWords);
 
 		root.getChildren().add(hbox);
-		
-		new Timer().schedule(new TimerTask() {
-			  @Override
-			  public void run() {
-				  startTimer(timerLabel);
-			  }
-			}, 1*1000);
-			
-		
+
+		// startTimer(timerLabel);
+
 	}
 
-	private void startTimer(Label timerLabel) {
-		// seconds variable for length in seconds
-		int seconds = 120;
-
-		// start count down
-		long startTime = System.currentTimeMillis();
-		long endTime = System.currentTimeMillis() + (seconds * 1000);
-		long temp = startTime + 1000;
-
-		while (startTime < endTime) {
-			if (startTime == temp) {
-				seconds--;
-				
-				temp += 1000;
-			}
-
-			startTime = System.currentTimeMillis();
+	private void updateWordsLabel(String text) {
+		getInputWordSet().add(text);
+		getInputWordSet().iterator();
+		for (String word : getInputWordSet()) {
+			wordsLabel.setText(wordsLabel.getText() + "\n" + word);
 		}
 	}
 
@@ -289,5 +285,13 @@ public class BoggleGUI extends Application {
 
 	public void setLabelArray(Label[][] labels) {
 		this.labelArray = labels;
+	}
+
+	public Set<String> getInputWordSet() {
+		return inputWordSet;
+	}
+
+	public void setInputWordSet(Set<String> inputWordSet) {
+		this.inputWordSet = inputWordSet;
 	}
 }
