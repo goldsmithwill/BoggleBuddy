@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javafx.animation.AnimationTimer;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -28,13 +28,13 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class BoggleGUI extends Application {
-	// creating validator and labelArray fields
+	// creating fields
 	private Validator validator;
 	private Label[][] labelArray;
 	private Set<String> inputWordSet;
-	// DELETE THIS NEXT FIELD LATER
-	// ITS ONLY TEMPORARY
-	static Label wordsLabel;
+	private Timer timer;
+	private Label timerLabel;
+	private Label wordsLabel;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -53,7 +53,7 @@ public class BoggleGUI extends Application {
 
 		// setting validator field
 		try {
-			setValidator(new Validator());
+			validator = new Validator();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -64,18 +64,18 @@ public class BoggleGUI extends Application {
 		tilePane.setPrefRows(4);
 
 		// creating labels to go in tilePane
-		setLabelArray(new Label[4][4]);
-		for (int i = 0; i < getLabelArray().length; i++) {
-			for (int j = 0; j < getLabelArray().length; j++) {
+		labelArray = new Label[4][4];
+		for (int i = 0; i < labelArray.length; i++) {
+			for (int j = 0; j < labelArray.length; j++) {
 				// setting label properties
-				getLabelArray()[i][j] = new Label(Character.toString(getValidator().getBoard()[i][j]));
-				getLabelArray()[i][j].setPrefSize(100, 100);
-				getLabelArray()[i][j].setFont(new Font(30));
-				getLabelArray()[i][j].setAlignment(Pos.CENTER);
-				getLabelArray()[i][j].setStyle("-fx-border-color: black;");
+				labelArray[i][j] = new Label(Character.toString(validator.getBoard()[i][j]));
+				labelArray[i][j].setPrefSize(100, 100);
+				labelArray[i][j].setFont(new Font(30));
+				labelArray[i][j].setAlignment(Pos.CENTER);
+				labelArray[i][j].setStyle("-fx-border-color: black;");
 
 				// adding the label to the tilePane
-				tilePane.getChildren().add(getLabelArray()[i][j]);
+				tilePane.getChildren().add(labelArray[i][j]);
 			}
 		}
 
@@ -96,11 +96,11 @@ public class BoggleGUI extends Application {
 			// checking if the new char is not null or no value
 			else if (newValue != null && newValue.length() > 0) {
 				// creating board variable from Validator board
-				char[][] board = getValidator().getBoard();
+				char[][] board = validator.getBoard();
 
 				// boardCopy for initial findWordPath recursive start
 				char[][] boardCopy = new char[4][4];
-				boardCopy = getValidator().updateToBoard(boardCopy);
+				boardCopy = validator.updateToBoard(boardCopy);
 
 				// boolean shouldBreak variable
 				boolean shouldBreak = false;
@@ -116,7 +116,7 @@ public class BoggleGUI extends Application {
 							initPath.add(new int[] { i, j });
 
 							// recursive findWordPath method for newValue
-							if (findWordPath(newValue, boardCopy, getValidator().getNextIndexes(new int[] { i, j }), 1,
+							if (findWordPath(newValue, boardCopy, validator.getNextIndexes(new int[] { i, j }), 1,
 									initPath)) {
 								shouldBreak = true;
 								break;
@@ -143,7 +143,7 @@ public class BoggleGUI extends Application {
 					resetBoardColor();
 
 					// comparing validWordSet w/ textField value
-					if (getValidator().getValidWordSet().contains(text)) {
+					if (validator.getValidWordSet().contains(text)) {
 						updateWordsLabel(text);
 					} else {
 						System.out.println("NO MATCH");
@@ -155,15 +155,19 @@ public class BoggleGUI extends Application {
 			}
 		});
 
-		// creating timerLabel
-		AnimationTimer timer = new AnimationTimer();
-		Label timerLabel = new Label();
+		// creating timerLabel and timer
+
+		timer = new Timer();
+		timer.schedule(new Countdown(), 1000, 1000);
+
+		timerLabel = new Label();
 		timerLabel.setPrefSize(300, 100);
 		timerLabel.setFont(new Font(20));
 		timerLabel.setStyle("-fx-border-color: black;");
+		timerLabel.setText("120");
 
 		// creating wordsLabel and initializing the input set
-		setInputWordSet(new HashSet<String>());
+		inputWordSet = new HashSet<String>();
 
 		wordsLabel = new Label();
 		wordsLabel.setPrefSize(300, 375);
@@ -182,14 +186,30 @@ public class BoggleGUI extends Application {
 
 		root.getChildren().add(hbox);
 
-		// startTimer(timerLabel);
-
 	}
 
+	// countdown class to run 2 min countdown timer
+	class Countdown extends TimerTask {
+		public void run() {
+			// getting int value of the timerLabel and bringing it down by one
+			int timerValue = Integer.parseInt(timerLabel.getText());
+			timerValue--;
+
+			// setting the text of the timerLabel to the new timerValue
+			System.out.println(Integer.toString(timerValue));
+			timerLabel.setText("" + timerValue);
+
+			if (timerValue == 0) {
+				timer.cancel();
+			}
+		}
+	}
+
+	// method to update the wordsLabel
 	private void updateWordsLabel(String text) {
-		getInputWordSet().add(text);
-		getInputWordSet().iterator();
-		for (String word : getInputWordSet()) {
+		inputWordSet.add(text);
+		inputWordSet.iterator();
+		for (String word : inputWordSet) {
 			wordsLabel.setText(wordsLabel.getText() + "\n" + word);
 		}
 	}
@@ -223,7 +243,7 @@ public class BoggleGUI extends Application {
 				path.add(new int[] { x, y });
 
 				// recursion
-				if (findWordPath(inputWord, board, getValidator().getNextIndexes(new int[] { x, y }), (charIndex + 1),
+				if (findWordPath(inputWord, board, validator.getNextIndexes(new int[] { x, y }), (charIndex + 1),
 						path)) {
 					return true;
 				} else {
@@ -234,7 +254,7 @@ public class BoggleGUI extends Application {
 
 		}
 		// resetting board to global default
-		board = getValidator().updateToBoard(board);
+		board = validator.updateToBoard(board);
 		return false;
 
 	}
@@ -252,8 +272,7 @@ public class BoggleGUI extends Application {
 
 			// highlighting the current square yellow
 			Paint paint = Paint.valueOf("#ffff33");
-			getLabelArray()[x][y]
-					.setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
+			labelArray[x][y].setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
 		}
 
 	}
@@ -261,37 +280,12 @@ public class BoggleGUI extends Application {
 	// resetBoardColor method to reset the board's color
 	public void resetBoardColor() {
 		// setting all of the squares back to default white color
-		for (int i = 0; i < getLabelArray().length; i++) {
-			for (int j = 0; j < getLabelArray()[0].length; j++) {
+		for (int i = 0; i < labelArray.length; i++) {
+			for (int j = 0; j < labelArray[0].length; j++) {
 				Paint paint = Paint.valueOf("#ffffff");
-				getLabelArray()[i][j]
+				labelArray[i][j]
 						.setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
 			}
 		}
-	}
-
-	// getters and setters
-	public Validator getValidator() {
-		return validator;
-	}
-
-	public void setValidator(Validator validator) {
-		this.validator = validator;
-	}
-
-	public Label[][] getLabelArray() {
-		return labelArray;
-	}
-
-	public void setLabelArray(Label[][] labels) {
-		this.labelArray = labels;
-	}
-
-	public Set<String> getInputWordSet() {
-		return inputWordSet;
-	}
-
-	public void setInputWordSet(Set<String> inputWordSet) {
-		this.inputWordSet = inputWordSet;
 	}
 }
