@@ -207,8 +207,13 @@ public class BoggleGUI extends Application {
 
 	// method to update the wordsLabel
 	private void updateWordsLabel(String text) {
+		// adding text to inputWordSet
 		inputWordSet.add(text);
-		inputWordSet.iterator();
+
+		// resetting wordsLabel text
+		wordsLabel.setText("");
+
+		// iterating through inputWordSet and adding the words to GUI
 		for (String word : inputWordSet) {
 			wordsLabel.setText(wordsLabel.getText() + "\n" + word);
 		}
