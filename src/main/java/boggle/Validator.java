@@ -26,12 +26,6 @@ public class Validator {
 		}
 
 		generateValidWordSet();
-		//
-		// // this whole chunk of code is just for testing
-		// // it's all hardcoding and stuff
-		// List<int[]> tempPath = new ArrayList<int[]>();
-		// tempPath.add(new int[] { 1, 1 });
-		// getNextIndexes(tempPath);
 	}
 
 	// generateWordSet method to generate a set of
@@ -64,14 +58,17 @@ public class Validator {
 	// boolean recursive validateWord method
 	// to compare input word to board
 	public void validateWord(String searchWord, char[][] board, List<int[]> nextIndexes, int charIndex) {
-		// creating currentChar from charIndex
+		// if the charIndex reaches inputWord.length:
+		// add searchWord to validWordSet and then return
 		if (charIndex == searchWord.length()) {
 			getValidWordSet().add(searchWord);
 			return;
 		}
 
+		// creating currentChar from charIndex
 		char currentChar = searchWord.charAt(charIndex);
 
+		// going through nextIndexes list
 		for (int i = 0; i < nextIndexes.size(); i++) {
 			// creating x and y from current index in nextIndexes
 			int x = nextIndexes.get(i)[0];
@@ -85,10 +82,11 @@ public class Validator {
 				// recursion
 				validateWord(searchWord, board, getNextIndexes(new int[] { x, y }), (charIndex + 1));
 
-				// resetting board to global default
-				board = updateToBoard(board);
 			}
+
 		}
+		// resetting board to global default
+		board = updateToBoard(board);
 	}
 
 	// // findWords method to walk through board
@@ -210,7 +208,6 @@ public class Validator {
 				this.board[i][j] = (char) letterNum;
 			}
 		}
-
 	}
 
 	public void setWords(String filename) throws FileNotFoundException {
