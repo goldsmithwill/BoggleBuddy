@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
-import java.util.TimerTask;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -33,6 +32,7 @@ public class BoggleGUI extends Application {
 	private Label[][] labelArray;
 	private Set<String> inputWordSet;
 	private Timer timer;
+	private Countdown countdown;
 	private Label timerLabel;
 	private Label wordsLabel;
 
@@ -44,6 +44,7 @@ public class BoggleGUI extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		init(primaryStage);
 		primaryStage.show();
+
 	}
 
 	private void init(Stage primaryStage) {
@@ -155,16 +156,16 @@ public class BoggleGUI extends Application {
 			}
 		});
 
-		// creating timerLabel and timer
-
-		timer = new Timer();
-		timer.schedule(new Countdown(), 1000, 1000);
-
+		// initializing timerLabel
 		timerLabel = new Label();
 		timerLabel.setPrefSize(300, 100);
 		timerLabel.setFont(new Font(20));
 		timerLabel.setStyle("-fx-border-color: black;");
-		timerLabel.setText("120");
+
+		// initializing timer and countdown
+		timer = new Timer();
+		countdown = new Countdown(10);
+		timer.schedule(countdown, 1000, 1000);
 
 		// creating wordsLabel and initializing the input set
 		inputWordSet = new HashSet<String>();
@@ -188,21 +189,19 @@ public class BoggleGUI extends Application {
 
 	}
 
-	// countdown class to run 2 min countdown timer
-	class Countdown extends TimerTask {
-		public void run() {
-			// getting int value of the timerLabel and bringing it down by one
-			int timerValue = Integer.parseInt(timerLabel.getText());
-			timerValue--;
-
+	// method to update timerLabel
+	public void updateTimerLabel() {
+		int timerValue = countdown.getTimerValue();
+		// until the timer counts down to zero
+		while (timerValue > 0) {
+			System.out.println(timerValue);
 			// setting the text of the timerLabel to the new timerValue
-			System.out.println(Integer.toString(timerValue));
-			timerLabel.setText("" + timerValue);
-
-			if (timerValue == 0) {
-				timer.cancel();
-			}
+			timerLabel.setText(Integer.toString(timerValue));
+			timerValue = countdown.getTimerValue();
 		}
+
+		// closes timer once it runs out
+		timer.cancel();
 	}
 
 	// method to update the wordsLabel
