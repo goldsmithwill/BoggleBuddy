@@ -44,7 +44,10 @@ public class BoggleGUI extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		init(primaryStage);
 		primaryStage.show();
-
+		// initializing timer and countdown
+		timer = new Timer();
+		countdown = new Countdown(10);
+		timer.schedule(countdown, 1000, 1000);
 	}
 
 	private void init(Stage primaryStage) {
@@ -161,11 +164,6 @@ public class BoggleGUI extends Application {
 		timerLabel.setPrefSize(300, 100);
 		timerLabel.setFont(new Font(20));
 		timerLabel.setStyle("-fx-border-color: black;");
-
-		// initializing timer and countdown
-		timer = new Timer();
-		countdown = new Countdown(10);
-		timer.schedule(countdown, 1000, 1000);
 
 		// creating wordsLabel and initializing the input set
 		inputWordSet = new HashSet<String>();
