@@ -15,7 +15,6 @@ public class Countdown extends TimerTask {
 	public void run() {
 		// subtracting 1 from timerValue
 		setTimerValue(getTimerValue() - 1);
-		new BoggleGUI().updateTimerLabel();
 	}
 
 	// getters and setters

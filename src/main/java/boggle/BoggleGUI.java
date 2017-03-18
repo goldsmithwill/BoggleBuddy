@@ -5,14 +5,21 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -25,29 +32,32 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class BoggleGUI extends Application {
 	// creating fields
 	private Validator validator;
-	private Label[][] labelArray;
+	private Button[][] buttonArray;
+	TextField inputTextField;
 	private Set<String> inputWordSet;
-	private Timer timer;
-	private Countdown countdown;
 	private Label timerLabel;
 	private Label wordsLabel;
+	private Timeline timeline;
+	private int timeSeconds;
 
 	public static void main(String[] args) {
+		// launching start() method
 		launch(args);
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		// creating GUI
 		init(primaryStage);
 		primaryStage.show();
-		// initializing timer and countdown
-		timer = new Timer();
-		countdown = new Countdown(10);
-		timer.schedule(countdown, 1000, 1000);
+
+		// starting 2 min countdown timer
+		startTimer(120);
 	}
 
 	private void init(Stage primaryStage) {
@@ -67,24 +77,53 @@ public class BoggleGUI extends Application {
 		tilePane.setPrefColumns(4);
 		tilePane.setPrefRows(4);
 
-		// creating labels to go in tilePane
-		labelArray = new Label[4][4];
-		for (int i = 0; i < labelArray.length; i++) {
-			for (int j = 0; j < labelArray.length; j++) {
-				// setting label properties
-				labelArray[i][j] = new Label(Character.toString(validator.getBoard()[i][j]));
-				labelArray[i][j].setPrefSize(100, 100);
-				labelArray[i][j].setFont(new Font(30));
-				labelArray[i][j].setAlignment(Pos.CENTER);
-				labelArray[i][j].setStyle("-fx-border-color: black;");
+		// creating buttons to go in tilePane
+		buttonArray = new Button[4][4];
+		for (int i = 0; i < buttonArray.length; i++) {
+			for (int j = 0; j < buttonArray.length; j++) {
+				// setting button properties
+				buttonArray[i][j] = new Button(Character.toString(validator.getBoard()[i][j]));
+				buttonArray[i][j].setPrefSize(100, 100);
+				buttonArray[i][j].setFont(new Font(30));
+				buttonArray[i][j].setAlignment(Pos.CENTER);
+				buttonArray[i][j].setStyle("-fx-border-color: black;");
 
-				// adding the label to the tilePane
-				tilePane.getChildren().add(labelArray[i][j]);
+				// creating listener for buttonArray
+				buttonArray[i][j].setOnAction(new EventHandler<ActionEvent>() {
+					@Override
+					public void handle(ActionEvent event) {
+						// getting text by adding clicked button's letter
+						// to inputTextField's text
+						String text = inputTextField.getText() + ((Button) event.getSource()).getText();
+
+						// setting inputTextField value to new text
+						inputTextField.setText(text);
+
+//						// resetting board
+//						resetBoardColor();
+
+						// setting square color to yellow
+						Paint paint = Paint.valueOf("#ffff33");
+						((Button) event.getSource()).setBackground(
+								new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
+
+						// comparing validWordSet w/ textField value
+						if (validator.getValidWordSet().contains(text)) {
+							updateWordsLabel(text);
+						} else {
+							System.out.println("NO MATCH");
+						}
+
+					}
+				});
+
+				// adding the button to the tilePane
+				tilePane.getChildren().add(buttonArray[i][j]);
 			}
 		}
 
 		// creating inputTextField for user input
-		TextField inputTextField = new TextField();
+		inputTextField = new TextField();
 		inputTextField.setPrefSize(400, 75);
 		inputTextField.setFont(new Font(20));
 		inputTextField.setStyle("-fx-border-color: black;");
@@ -159,19 +198,34 @@ public class BoggleGUI extends Application {
 			}
 		});
 
+		// creating max length listener for inputTextField
+		inputTextField.textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(final ObservableValue<? extends String> ov, final String oldValue,
+					final String newValue) {
+				if (inputTextField.getText().length() > 16) {
+					String text = inputTextField.getText().substring(0, 16);
+					inputTextField.setText(text);
+				}
+			}
+		});
+
 		// initializing timerLabel
 		timerLabel = new Label();
 		timerLabel.setPrefSize(300, 100);
-		timerLabel.setFont(new Font(20));
+		timerLabel.setFont(new Font(40));
 		timerLabel.setStyle("-fx-border-color: black;");
+		timerLabel.setAlignment(Pos.CENTER);
 
-		// creating wordsLabel and initializing the input set
+		// creating inputWordSet
 		inputWordSet = new HashSet<String>();
 
+		// creating and initializing wordsLabel
 		wordsLabel = new Label();
 		wordsLabel.setPrefSize(300, 375);
 		wordsLabel.setFont(new Font(20));
 		wordsLabel.setStyle("-fx-border-color: black;");
+		wordsLabel.setAlignment(Pos.TOP_CENTER);
 
 		// creating vboxes and hboxes and adding them to GUI
 		VBox boardAndInput = new VBox();
@@ -187,19 +241,33 @@ public class BoggleGUI extends Application {
 
 	}
 
-	// method to update timerLabel
-	public void updateTimerLabel() {
-		int timerValue = countdown.getTimerValue();
-		// until the timer counts down to zero
-		while (timerValue > 0) {
-			System.out.println(timerValue);
-			// setting the text of the timerLabel to the new timerValue
-			timerLabel.setText(Integer.toString(timerValue));
-			timerValue = countdown.getTimerValue();
+	private void startTimer(int timeFieldValue) {
+		// setting field values
+		timeline = null;
+		timeSeconds = timeFieldValue;
+
+		// stop timeline if it is not null
+		if (timeline != null) {
+			timeline.stop();
 		}
 
-		// closes timer once it runs out
-		timer.cancel();
+		// update timerLabel
+		timerLabel.setText(Integer.toString(timeSeconds));
+		timeline = new Timeline();
+		timeline.setCycleCount(Timeline.INDEFINITE);
+		timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), new EventHandler() {
+			// KeyFrame event handler
+			@Override
+			public void handle(Event event) {
+				timeSeconds--;
+				// update timerLabel
+				timerLabel.setText(Integer.toString(timeSeconds));
+				if (timeSeconds <= 0) {
+					timeline.stop();
+				}
+			}
+		}));
+		timeline.playFromStart();
 	}
 
 	// method to update the wordsLabel
@@ -274,7 +342,7 @@ public class BoggleGUI extends Application {
 
 			// highlighting the current square yellow
 			Paint paint = Paint.valueOf("#ffff33");
-			labelArray[x][y].setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
+			buttonArray[x][y].setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
 		}
 
 	}
@@ -282,10 +350,10 @@ public class BoggleGUI extends Application {
 	// resetBoardColor method to reset the board's color
 	public void resetBoardColor() {
 		// setting all of the squares back to default white color
-		for (int i = 0; i < labelArray.length; i++) {
-			for (int j = 0; j < labelArray[0].length; j++) {
+		for (int i = 0; i < buttonArray.length; i++) {
+			for (int j = 0; j < buttonArray[0].length; j++) {
 				Paint paint = Paint.valueOf("#ffffff");
-				labelArray[i][j]
+				buttonArray[i][j]
 						.setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
 			}
 		}
