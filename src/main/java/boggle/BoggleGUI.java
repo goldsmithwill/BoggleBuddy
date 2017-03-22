@@ -19,7 +19,6 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Labeled;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -97,22 +96,11 @@ public class BoggleGUI extends Application {
 						String text = inputTextField.getText() + ((Button) event.getSource()).getText();
 
 						// setting inputTextField value to new text
+						/*
+						 * this triggers the listener for the inputTextField,
+						 * highlighting the new path
+						 */
 						inputTextField.setText(text);
-
-//						// resetting board
-//						resetBoardColor();
-
-						// setting square color to yellow
-						Paint paint = Paint.valueOf("#ffff33");
-						((Button) event.getSource()).setBackground(
-								new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
-
-						// comparing validWordSet w/ textField value
-						if (validator.getValidWordSet().contains(text)) {
-							updateWordsLabel(text);
-						} else {
-							System.out.println("NO MATCH");
-						}
 
 					}
 				});
@@ -130,48 +118,7 @@ public class BoggleGUI extends Application {
 
 		// creating update listener for inputTextField
 		inputTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-
-			// if the input text field is empty
-			if (newValue.equals("")) {
-				// resetting board color
-				resetBoardColor();
-			}
-			// checking if the new char is not null or no value
-			else if (newValue != null && newValue.length() > 0) {
-				// creating board variable from Validator board
-				char[][] board = validator.getBoard();
-
-				// boardCopy for initial findWordPath recursive start
-				char[][] boardCopy = new char[4][4];
-				boardCopy = validator.updateToBoard(boardCopy);
-
-				// boolean shouldBreak variable
-				boolean shouldBreak = false;
-
-				// nested for loops going through the board
-				// and comparing it to first letter of newValue
-				for (int i = 0; i < board.length; i++) {
-					for (int j = 0; j < board[0].length; j++) {
-						if (board[i][j] == newValue.charAt(0)) {
-
-							// creating initPath variable w/ first index
-							List<int[]> initPath = new ArrayList<int[]>();
-							initPath.add(new int[] { i, j });
-
-							// recursive findWordPath method for newValue
-							if (findWordPath(newValue, boardCopy, validator.getNextIndexes(new int[] { i, j }), 1,
-									initPath)) {
-								shouldBreak = true;
-								break;
-							}
-						}
-						if (shouldBreak) {
-							break;
-						}
-					}
-				}
-
-			}
+			highlightInputPath(newValue);
 		});
 
 		// creating enter listener for inputTextField
@@ -268,6 +215,50 @@ public class BoggleGUI extends Application {
 			}
 		}));
 		timeline.playFromStart();
+	}
+
+	private void highlightInputPath(String inputPath) {
+		// if the input text field is empty
+		if (inputPath.equals("")) {
+			// resetting board color
+			resetBoardColor();
+		}
+		// checking if the new char is not null or no value
+		else if (inputPath != null && inputPath.length() > 0) {
+			// creating board variable from Validator board
+			char[][] board = validator.getBoard();
+
+			// boardCopy for initial findWordPath recursive start
+			char[][] boardCopy = new char[4][4];
+			boardCopy = validator.updateToBoard(boardCopy);
+
+			// boolean shouldBreak variable
+			boolean shouldBreak = false;
+
+			// nested for loops going through the board
+			// and comparing it to first letter of inputPath
+			for (int i = 0; i < board.length; i++) {
+				for (int j = 0; j < board[0].length; j++) {
+					if (board[i][j] == inputPath.charAt(0)) {
+
+						// creating initPath variable w/ first index
+						List<int[]> initPath = new ArrayList<int[]>();
+						initPath.add(new int[] { i, j });
+
+						// recursive findWordPath method for inputPath
+						if (findWordPath(inputPath, boardCopy, validator.getNextIndexes(new int[] { i, j }), 1,
+								initPath)) {
+							shouldBreak = true;
+							break;
+						}
+					}
+					if (shouldBreak) {
+						break;
+					}
+				}
+			}
+
+		}
 	}
 
 	// method to update the wordsLabel

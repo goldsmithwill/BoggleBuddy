@@ -89,56 +89,6 @@ public class Validator {
 		board = updateToBoard(board);
 	}
 
-	// // findWords method to walk through board
-	// public void findWords(String word, int[] currentIndex, List<int[]> path)
-	// {
-	//
-	// word += getBoard()[currentIndex[0]][currentIndex[1]];
-	//
-	// if (getWordSet().contains(word)) {
-	// getWordPathMap().put(path, word);
-	// } else {
-	// path.add(currentIndex);
-	//
-	// // getValidNextIndexes(currentIndex, path) return an
-	// // int[indexes][x+y]
-	// // for loop going through the returned array and running findWords
-	// // for each one
-	//
-	// // findWords(word, getNextIndexes(path), path);
-	// }
-	//
-	// }
-
-	// // validateWord method to search if word is in wordList
-	// public boolean validateWord(String searchWord) {
-	//
-	// // arraylist of valid words that start with searchword
-	// List<String> validWordSet = new ArrayList<String>();
-	//
-	// // for loop to find all words that start with searchWord
-	// // those words are added to validWordSet
-	// for (int k = 0; k < getWordArray().length; k++) {
-	// if (getWordArray()[k].startsWith(searchWord)) {
-	// // System.out.println(getWordArray()[k]);
-	// validWordSet.add(getWordArray()[k]);
-	// }
-	// }
-	//
-	// // if the wordList contains the searchWord
-	// if (getWordSet().contains(searchWord)) {
-	// return false;
-	// }
-	// // if no words start with searchWord
-	// if (validWordSet.size() == 0) {
-	// return false;
-	// }
-	// // if at least one word starts with searchWord
-	// else {
-	// return true;
-	// }
-	// }
-
 	// getNextIndexes to return all valid next indexes
 	// for validateWord method
 	public List<int[]> getNextIndexes(int[] currentIndex) {
