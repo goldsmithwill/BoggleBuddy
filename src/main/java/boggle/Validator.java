@@ -143,21 +143,23 @@ public class Validator {
 	}
 
 	public void setBoard(char[][] board) {
-		this.board = board;
-		// 2d char array for board
-		// nested for loops to generate board
-		for (int i = 0; i < this.board.length; i++) {
-			for (int j = 0; j < this.board[0].length; j++) {
-
-				// generates random num 97-122 (for ASCII)
-				Random random = new Random();
-				int letterNum = random.nextInt(26) + 97;
-
-				// casts char to convert dec to letter
-				// adding letter to board
-				this.board[i][j] = (char) letterNum;
-			}
-		}
+		 this.board = board;
+		 // 2d char array for board
+		 // nested for loops to generate board
+		 for (int i = 0; i < this.board.length; i++) {
+		 for (int j = 0; j < this.board[0].length; j++) {
+		
+		 // generates random num 97-122 (for ASCII)
+		 Random random = new Random();
+		 int letterNum = random.nextInt(26) + 97;
+		
+		 // casts char to convert dec to letter
+		 // adding letter to board
+		 this.board[i][j] = (char) letterNum;
+		 }
+		 }
+//		this.board = new char[][] { { 'm', 'g', 'z', 'n' }, { 'h', 'v', 'c', 'm' }, { 'm', 'p', 'w', 'm' },
+//				{ 'w', 'n', 'g', 'm' } };
 	}
 
 	public void setWords(String filename) throws FileNotFoundException {

@@ -293,8 +293,7 @@ public class BoggleGUI extends Application {
 		// if the charIndex reaches inputWord.length:
 		// highlight the path and then return
 		if (charIndex == inputWord.length()) {
-			highlightPath(path);
-			return true;
+			return highlightPath(path);
 		}
 
 		// creating currentChar from charIndex
@@ -331,7 +330,7 @@ public class BoggleGUI extends Application {
 	}
 
 	// highlightPath method to highlight the path
-	public void highlightPath(List<int[]> path) {
+	public boolean highlightPath(List<int[]> path) {
 		// resetting board color
 		resetBoardColor();
 
@@ -341,12 +340,20 @@ public class BoggleGUI extends Application {
 			int x = path.get(k)[0];
 			int y = path.get(k)[1];
 
-			
-			// highlighting the current square yellow
+			// creating potential highlight background for cell
 			Paint paint = Paint.valueOf("#ffff33");
-			buttonArray[x][y].setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
-		}
+			Background yellowHighlight = new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY));
 
+			// if statement to check if cell is already highlighted
+			if (!buttonArray[x][y].getBackground().equals(yellowHighlight)) {
+				// highlighting the current square yellow
+				buttonArray[x][y].setBackground(yellowHighlight);
+			} else {
+				System.out.println("HI");
+				return false;
+			}
+		}
+		return true;
 	}
 
 	// resetBoardColor method to reset the board's color
