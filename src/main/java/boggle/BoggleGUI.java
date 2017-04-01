@@ -118,11 +118,12 @@ public class BoggleGUI extends Application {
 
 		// creating update listener for inputTextField
 		inputTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-			highlightInputPath(newValue);
+			highlightWord(newValue);
 		});
 
 		// creating enter listener for inputTextField
 		inputTextField.setOnKeyPressed(new EventHandler<KeyEvent>() {
+
 			@Override
 			public void handle(KeyEvent keyEvent) {
 				// if enter key is pressed
@@ -217,14 +218,14 @@ public class BoggleGUI extends Application {
 		timeline.playFromStart();
 	}
 
-	private void highlightInputPath(String inputPath) {
+	private void highlightWord(String word) {
 		// if the input text field is empty
-		if (inputPath.equals("")) {
+		if (word.equals("")) {
 			// resetting board color
 			resetBoardColor();
 		}
 		// checking if the new char is not null or no value
-		else if (inputPath != null && inputPath.length() > 0) {
+		else if (word != null && word.length() > 0) {
 			// creating board variable from Validator board
 			char[][] board = validator.getBoard();
 
@@ -235,30 +236,40 @@ public class BoggleGUI extends Application {
 			// boolean shouldBreak variable
 			boolean shouldBreak = false;
 
+			// hasValidPath variable to help with user input restriction
+			boolean hasValidPath = false;
+
 			// nested for loops going through the board
 			// and comparing it to first letter of inputPath
 			for (int i = 0; i < board.length; i++) {
 				for (int j = 0; j < board[0].length; j++) {
-					if (board[i][j] == inputPath.charAt(0)) {
+					if (board[i][j] == word.charAt(0)) {
 
 						// creating initPath variable w/ first index
 						List<int[]> initPath = new ArrayList<int[]>();
 						initPath.add(new int[] { i, j });
 
 						// recursive findWordPath method for inputPath
-						if (findWordPath(inputPath, boardCopy, validator.getNextIndexes(new int[] { i, j }), 1,
-								initPath)) {
+						if (findWordPath(word, boardCopy, validator.getNextIndexes(new int[] { i, j }), 1, initPath)) {
 							shouldBreak = true;
+							hasValidPath = true;
 							break;
 						}
 					}
+
 					if (shouldBreak) {
 						break;
 					}
 				}
 			}
-
+			if (!hasValidPath) {
+				String inputText = inputTextField.getText();
+				if (inputText.length() > 0) {
+					inputTextField.setText(inputText.substring(0, (inputText.length() - 1)));
+				}
+			}
 		}
+
 	}
 
 	// method to update the wordsLabel
@@ -317,7 +328,6 @@ public class BoggleGUI extends Application {
 		// resetting board to global default
 		board = validator.updateToBoard(board);
 		return false;
-
 	}
 
 	// highlightPath method to highlight the path
@@ -331,6 +341,7 @@ public class BoggleGUI extends Application {
 			int x = path.get(k)[0];
 			int y = path.get(k)[1];
 
+			
 			// highlighting the current square yellow
 			Paint paint = Paint.valueOf("#ffff33");
 			buttonArray[x][y].setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
