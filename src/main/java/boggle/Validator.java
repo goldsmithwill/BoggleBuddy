@@ -17,7 +17,7 @@ public class Validator {
 
 	// validator constructor starts everything up
 	public Validator() throws FileNotFoundException {
-		String filename = "/Users/willgoldsmith/Documents/workspace/boggle-buddy/src/main/resources/words.txt";
+		String filename = "/Users/willgoldsmith/Documents/programming/workspace/boggle-buddy/src/main/resources/words.txt";
 		setWords(filename);
 		setBoard(new char[4][4]);
 

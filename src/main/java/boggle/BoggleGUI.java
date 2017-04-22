@@ -185,8 +185,9 @@ public class BoggleGUI extends Application {
 		HBox hbox = new HBox();
 		hbox.getChildren().addAll(boardAndInput, timerAndWords);
 
+		resetBoardColor();
+		
 		root.getChildren().add(hbox);
-
 	}
 
 	private void startTimer(int timeFieldValue) {
