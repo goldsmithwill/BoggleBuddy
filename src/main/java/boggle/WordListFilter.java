@@ -8,7 +8,7 @@ public class WordListFilter {
 		Scanner console = new Scanner(System.in);
 
 		// create files and file reading/writing objects
-		File f = new File("/Users/willgoldsmith/Documents/programming/workspace/boggle-buddy/src/main/resources/words.txt");
+		File f = new File(new File(new File("").getAbsolutePath()) + "/src/main/resources/words.txt");
 		File temp = new File("myTempFile.txt");
 		Scanner input = new Scanner(f); // reader
 		BufferedWriter writer = new BufferedWriter(new FileWriter(temp)); // writer
