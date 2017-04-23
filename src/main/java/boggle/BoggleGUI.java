@@ -186,7 +186,7 @@ public class BoggleGUI extends Application {
 		hbox.getChildren().addAll(boardAndInput, timerAndWords);
 
 		resetBoardColor();
-		
+
 		root.getChildren().add(hbox);
 	}
 
@@ -201,7 +201,7 @@ public class BoggleGUI extends Application {
 		}
 
 		// update timerLabel
-		timerLabel.setText(Integer.toString(timeSeconds));
+		timerLabel.setText(parseSeconds(timeSeconds));
 		timeline = new Timeline();
 		timeline.setCycleCount(Timeline.INDEFINITE);
 		timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), new EventHandler() {
@@ -210,13 +210,25 @@ public class BoggleGUI extends Application {
 			public void handle(Event event) {
 				timeSeconds--;
 				// update timerLabel
-				timerLabel.setText(Integer.toString(timeSeconds));
+				timerLabel.setText(parseSeconds(timeSeconds));
 				if (timeSeconds <= 0) {
 					timeline.stop();
 				}
 			}
 		}));
 		timeline.playFromStart();
+	}
+
+	// parseSeconds method to take an int seconds value
+	// and parse it into minutes and seconds for timer
+	public String parseSeconds(int seconds) {
+		String m = Integer.toString(seconds / 60);
+		String s = Integer.toString(seconds % 60);
+		if (s.length() == 1) {
+			s = "0" + s;
+		}
+
+		return m + ":" + s;
 	}
 
 	private void highlightWord(String word) {
@@ -368,4 +380,5 @@ public class BoggleGUI extends Application {
 			}
 		}
 	}
+
 }
