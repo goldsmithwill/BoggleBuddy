@@ -19,6 +19,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -30,6 +31,7 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -37,10 +39,11 @@ public class BoggleGUI extends Application {
 	// creating fields
 	private Validator validator;
 	private Button[][] buttonArray;
-	TextField inputTextField;
+	private TextField inputTextField;
 	private Set<String> inputWordSet;
 	private Label timerLabel;
-	private Label wordsLabel;
+	private TextArea wordsArea;
+	private Popup popup;
 	private Timeline timeline;
 	private int timeSeconds;
 
@@ -61,7 +64,9 @@ public class BoggleGUI extends Application {
 
 	private void init(Stage primaryStage) {
 		Group root = new Group();
-		primaryStage.setScene(new Scene(root));
+		Scene scene = new Scene(root);
+		scene.getStylesheets().addAll(this.getClass().getResource("boggle.css").toExternalForm());
+		primaryStage.setScene(scene);
 		primaryStage.setResizable(false);
 
 		// setting validator field
@@ -135,7 +140,7 @@ public class BoggleGUI extends Application {
 
 					// comparing validWordSet w/ textField value
 					if (validator.getValidWordSet().contains(text)) {
-						updateWordsLabel(text);
+						updateWordsArea(text);
 					}
 
 					// clear text
@@ -163,22 +168,22 @@ public class BoggleGUI extends Application {
 		timerLabel.setStyle("-fx-border-color: black;");
 		timerLabel.setAlignment(Pos.CENTER);
 
-		// creating inputWordSet
+		// intitializing inputWordSet
 		inputWordSet = new HashSet<String>();
 
-		// creating and initializing wordsLabel
-		wordsLabel = new Label();
-		wordsLabel.setPrefSize(300, 375);
-		wordsLabel.setFont(new Font(20));
-		wordsLabel.setStyle("-fx-border-color: black;");
-		wordsLabel.setAlignment(Pos.TOP_CENTER);
+		// initializing wordsArea
+		wordsArea = new TextArea();
+		wordsArea.setPrefSize(300, 375);
+		wordsArea.setFont(new Font(20));
+		wordsArea.setStyle("-fx-border-color: black;");
+		wordsArea.setEditable(false);
 
 		// creating vboxes and hboxes and adding them to GUI
 		VBox boardAndInput = new VBox();
 		boardAndInput.getChildren().addAll(tilePane, inputTextField);
 
 		VBox timerAndWords = new VBox();
-		timerAndWords.getChildren().addAll(timerLabel, wordsLabel);
+		timerAndWords.getChildren().addAll(timerLabel, wordsArea);
 
 		HBox hbox = new HBox();
 		hbox.getChildren().addAll(boardAndInput, timerAndWords);
@@ -186,6 +191,7 @@ public class BoggleGUI extends Application {
 		resetBoardColor();
 
 		root.getChildren().add(hbox);
+
 	}
 
 	private void startTimer(int timeFieldValue) {
@@ -211,6 +217,7 @@ public class BoggleGUI extends Application {
 				timerLabel.setText(parseSeconds(timeSeconds));
 				if (timeSeconds <= 0) {
 					timeline.stop();
+					displayValidWords();
 				}
 			}
 		}));
@@ -259,7 +266,8 @@ public class BoggleGUI extends Application {
 						// creating initPath variable w/ first index
 						List<int[]> initPath = new ArrayList<int[]>();
 						initPath.add(new int[] { i, j });
-
+						boardCopy[i][j] = ' ';
+						
 						// recursive findWordPath method for inputPath
 						if (findWordPath(word, boardCopy, validator.getNextIndexes(new int[] { i, j }), 1, initPath)) {
 							shouldBreak = true;
@@ -283,17 +291,17 @@ public class BoggleGUI extends Application {
 
 	}
 
-	// method to update the wordsLabel
-	private void updateWordsLabel(String text) {
+	// method to update the wordsArea
+	private void updateWordsArea(String text) {
 		// adding text to inputWordSet
 		inputWordSet.add(text);
 
-		// resetting wordsLabel text
-		wordsLabel.setText("");
+		// resetting wordsArea text
+		wordsArea.setText("");
 
 		// iterating through inputWordSet and adding the words to GUI
 		for (String word : inputWordSet) {
-			wordsLabel.setText(wordsLabel.getText() + "\n" + word);
+			wordsArea.setText(wordsArea.getText() + "\n" + word);
 		}
 	}
 
@@ -375,6 +383,14 @@ public class BoggleGUI extends Application {
 				buttonArray[i][j]
 						.setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
 			}
+		}
+	}
+
+	private void displayValidWords() {
+		Set<String> validWordSet = validator.getValidWordSet();
+		wordsArea.setText(wordsArea.getText() + "\n" + "--------------------");
+		for (String validWord : validWordSet) {
+			wordsArea.setText(wordsArea.getText() + "\n" + validWord);
 		}
 	}
 
