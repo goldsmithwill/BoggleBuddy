@@ -21,10 +21,6 @@ public class Validator {
 		setWords(filename);
 		setBoard(new char[4][4]);
 
-		for (int i = 0; i < getBoard().length; i++) {
-			System.out.println(Arrays.toString(getBoard()[i]));
-		}
-
 		generateValidWordSet();
 	}
 
@@ -51,8 +47,6 @@ public class Validator {
 			// putting currentWord into recursive validateWord method
 			validateWord(currentWord, boardCopy, boardIndexes, 0);
 		}
-
-		System.out.println(getValidWordSet());
 	}
 
 	// boolean recursive validateWord method
@@ -114,8 +108,6 @@ public class Validator {
 
 				// if the values aren't breaking boundaries, add to nextIndexes
 				nextIndexes.add(new int[] { nextIndexValues[i][0], nextIndexValues[i][1] });
-				// System.out.print(Arrays.toString(new int[] {
-				// nextIndexValues[i][0], nextIndexValues[i][1] }));
 			}
 
 		}
@@ -158,8 +150,6 @@ public class Validator {
 		 this.board[i][j] = (char) letterNum;
 		 }
 		 }
-//		this.board = new char[][] { { 'm', 'g', 'z', 'n' }, { 'h', 'v', 'c', 'm' }, { 'm', 'p', 'w', 'm' },
-//				{ 'w', 'n', 'g', 'm' } };
 	}
 
 	public void setWords(String filename) throws FileNotFoundException {

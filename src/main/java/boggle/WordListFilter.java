@@ -3,6 +3,7 @@ package boggle;
 import java.util.*;
 import java.io.*;
 
+//WordListFilter class filters out non-real words from words.txt file
 public class WordListFilter {
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		Scanner console = new Scanner(System.in);
@@ -15,7 +16,8 @@ public class WordListFilter {
 
 		while (input.hasNextLine()) {
 			String line = input.nextLine();
-			if (line.length() < 3 || line.contains("\'") || line.matches(".*\\d.*") || line.contains("/") || onlyVowelsOrConsonants(line)) {
+			if (line.length() < 3 || line.contains("\'") || line.matches(".*\\d.*") || line.contains("/")
+					|| onlyVowelsOrConsonants(line)) {
 				continue;
 			}
 

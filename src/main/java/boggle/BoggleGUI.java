@@ -136,8 +136,6 @@ public class BoggleGUI extends Application {
 					// comparing validWordSet w/ textField value
 					if (validator.getValidWordSet().contains(text)) {
 						updateWordsLabel(text);
-					} else {
-						System.out.println("NO MATCH");
 					}
 
 					// clear text
@@ -362,7 +360,6 @@ public class BoggleGUI extends Application {
 				// highlighting the current square yellow
 				buttonArray[x][y].setBackground(yellowHighlight);
 			} else {
-				System.out.println("HI");
 				return false;
 			}
 		}
