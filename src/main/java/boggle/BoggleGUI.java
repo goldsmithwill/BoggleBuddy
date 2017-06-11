@@ -1,7 +1,6 @@
 package boggle;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,19 +30,20 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
-import javafx.stage.Popup;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class BoggleGUI extends Application {
 	// creating fields
-	private Validator validator;
+	private BoggleBackEnd b;
+	private Validator v;
 	private Button[][] buttonArray;
-	private TextField inputTextField;
+	public TextField inputTextField;
 	private Set<String> inputWordSet;
 	private Label timerLabel;
 	private TextArea wordsArea;
-	private Popup popup;
+	private Stage nextLevelPopup;
 	private Timeline timeline;
 	private int timeSeconds;
 
@@ -59,7 +59,7 @@ public class BoggleGUI extends Application {
 		primaryStage.show();
 
 		// starting 2 min countdown timer
-		startTimer(120);
+		startTimer(2);
 	}
 
 	private void init(Stage primaryStage) {
@@ -69,9 +69,12 @@ public class BoggleGUI extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.setResizable(false);
 
-		// setting validator field
+		// initializing b field
+		b = new BoggleBackEnd();
+
+		// initializing v field
 		try {
-			validator = new Validator();
+			v = new Validator();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -86,7 +89,7 @@ public class BoggleGUI extends Application {
 		for (int i = 0; i < buttonArray.length; i++) {
 			for (int j = 0; j < buttonArray.length; j++) {
 				// setting button properties
-				buttonArray[i][j] = new Button(Character.toString(validator.getBoard()[i][j]));
+				buttonArray[i][j] = new Button(Character.toString(v.getBoard()[i][j]));
 				buttonArray[i][j].setPrefSize(100, 100);
 				buttonArray[i][j].setFont(new Font(30));
 				buttonArray[i][j].setAlignment(Pos.CENTER);
@@ -123,7 +126,7 @@ public class BoggleGUI extends Application {
 
 		// creating update listener for inputTextField
 		inputTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-			highlightWord(newValue);
+			b.highlightWord(newValue);
 		});
 
 		// creating enter listener for inputTextField
@@ -139,7 +142,7 @@ public class BoggleGUI extends Application {
 					resetBoardColor();
 
 					// comparing validWordSet w/ textField value
-					if (validator.getValidWordSet().contains(text)) {
+					if (v.getValidWordSet().contains(text)) {
 						updateWordsArea(text);
 					}
 
@@ -178,6 +181,24 @@ public class BoggleGUI extends Application {
 		wordsArea.setStyle("-fx-border-color: black;");
 		wordsArea.setEditable(false);
 
+		// creating nextLevelButton
+		Button nextLevelButton = new Button("Go to Next Level");
+
+		// setting nextLevelButton properties
+		Paint paint = Paint.valueOf("#ffffff");
+		nextLevelButton.setBackground(new Background(new BackgroundFill(paint, CornerRadii.EMPTY, Insets.EMPTY)));
+		nextLevelButton.setFont(new Font(15));
+		nextLevelButton.setStyle("-fx-border-color: black;");
+
+		// creating nextLevelScene
+		Scene nextLevelScene = new Scene(nextLevelButton, 150, 65);
+
+		// initializing nextLevelPopup
+		nextLevelPopup = new Stage();
+		nextLevelPopup.initModality(Modality.APPLICATION_MODAL);
+		nextLevelPopup.initOwner(primaryStage);
+		nextLevelPopup.setScene(nextLevelScene);
+
 		// creating vboxes and hboxes and adding them to GUI
 		VBox boardAndInput = new VBox();
 		boardAndInput.getChildren().addAll(tilePane, inputTextField);
@@ -191,7 +212,6 @@ public class BoggleGUI extends Application {
 		resetBoardColor();
 
 		root.getChildren().add(hbox);
-
 	}
 
 	private void startTimer(int timeFieldValue) {
@@ -205,7 +225,7 @@ public class BoggleGUI extends Application {
 		}
 
 		// update timerLabel
-		timerLabel.setText(parseSeconds(timeSeconds));
+		timerLabel.setText(b.parseSeconds(timeSeconds));
 		timeline = new Timeline();
 		timeline.setCycleCount(Timeline.INDEFINITE);
 		timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), new EventHandler() {
@@ -214,81 +234,15 @@ public class BoggleGUI extends Application {
 			public void handle(Event event) {
 				timeSeconds--;
 				// update timerLabel
-				timerLabel.setText(parseSeconds(timeSeconds));
+				timerLabel.setText(b.parseSeconds(timeSeconds));
 				if (timeSeconds <= 0) {
 					timeline.stop();
 					displayValidWords();
+					popup();
 				}
 			}
 		}));
 		timeline.playFromStart();
-	}
-
-	// parseSeconds method to take an int seconds value
-	// and parse it into minutes and seconds for timer
-	public String parseSeconds(int seconds) {
-		String m = Integer.toString(seconds / 60);
-		String s = Integer.toString(seconds % 60);
-		if (s.length() == 1) {
-			s = "0" + s;
-		}
-
-		return m + ":" + s;
-	}
-
-	private void highlightWord(String word) {
-		// if the input text field is empty
-		if (word.equals("")) {
-			// resetting board color
-			resetBoardColor();
-		}
-		// checking if the new char is not null or no value
-		else if (word != null && word.length() > 0) {
-			// creating board variable from Validator board
-			char[][] board = validator.getBoard();
-
-			// boardCopy for initial findWordPath recursive start
-			char[][] boardCopy = new char[4][4];
-			boardCopy = validator.updateToBoard(boardCopy);
-
-			// boolean shouldBreak variable
-			boolean shouldBreak = false;
-
-			// hasValidPath variable to help with user input restriction
-			boolean hasValidPath = false;
-
-			// nested for loops going through the board
-			// and comparing it to first letter of inputPath
-			for (int i = 0; i < board.length; i++) {
-				for (int j = 0; j < board[0].length; j++) {
-					if (board[i][j] == word.charAt(0)) {
-
-						// creating initPath variable w/ first index
-						List<int[]> initPath = new ArrayList<int[]>();
-						initPath.add(new int[] { i, j });
-						boardCopy[i][j] = ' ';
-						
-						// recursive findWordPath method for inputPath
-						if (findWordPath(word, boardCopy, validator.getNextIndexes(new int[] { i, j }), 1, initPath)) {
-							shouldBreak = true;
-							hasValidPath = true;
-							break;
-						}
-					}
-
-					if (shouldBreak) {
-						break;
-					}
-				}
-			}
-			if (!hasValidPath) {
-				String inputText = inputTextField.getText();
-				if (inputText.length() > 0) {
-					inputTextField.setText(inputText.substring(0, (inputText.length() - 1)));
-				}
-			}
-		}
-
 	}
 
 	// method to update the wordsArea
@@ -303,49 +257,6 @@ public class BoggleGUI extends Application {
 		for (String word : inputWordSet) {
 			wordsArea.setText(wordsArea.getText() + "\n" + word);
 		}
-	}
-
-	// recursive boolean findWordPath method
-	public boolean findWordPath(String inputWord, char[][] board, List<int[]> nextIndexes, int charIndex,
-			List<int[]> path) {
-
-		// if the charIndex reaches inputWord.length:
-		// highlight the path and then return
-		if (charIndex == inputWord.length()) {
-			return highlightPath(path);
-		}
-
-		// creating currentChar from charIndex
-		char currentChar = inputWord.charAt(charIndex);
-
-		// going through nextIndexes list
-		for (int i = 0; i < nextIndexes.size(); i++) {
-			// creating x and y from current index in nextIndexes
-			int x = nextIndexes.get(i)[0];
-			int y = nextIndexes.get(i)[1];
-
-			// if the currentIndex is currentChar
-			if (board[x][y] == currentChar) {
-				// making board index w/ currentChar blank
-				board[x][y] = ' ';
-
-				// adding index to path
-				path.add(new int[] { x, y });
-
-				// recursion
-				if (findWordPath(inputWord, board, validator.getNextIndexes(new int[] { x, y }), (charIndex + 1),
-						path)) {
-					return true;
-				} else {
-					return false;
-				}
-
-			}
-
-		}
-		// resetting board to global default
-		board = validator.updateToBoard(board);
-		return false;
 	}
 
 	// highlightPath method to highlight the path
@@ -387,11 +298,14 @@ public class BoggleGUI extends Application {
 	}
 
 	private void displayValidWords() {
-		Set<String> validWordSet = validator.getValidWordSet();
+		Set<String> validWordSet = v.getValidWordSet();
 		wordsArea.setText(wordsArea.getText() + "\n" + "--------------------");
 		for (String validWord : validWordSet) {
 			wordsArea.setText(wordsArea.getText() + "\n" + validWord);
 		}
 	}
 
+	private void popup() {
+		nextLevelPopup.show();
+	}
 }
